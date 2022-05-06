@@ -105,19 +105,6 @@ autocmd! bufwritepost .vimrc source $MYVIMRC
 
 let python_highlight_all=1
 
-" LaTeX "
-"""""""""
-
-let g:vimtex_compiler_progname = 'nvr'
-let g:latex_view_general_viewer = 'zathura'
-let g:vimtex_view_method = 'zathura'
-
-
-if has('macunix')
-  let g:latex_view_general_viewer = '/Applications/Skim.app/Contents/MacOS/Skim'
-  let g:vimtex_view_method = 'skim'
-endif
-
 
 " Other "
 """""""""
@@ -128,8 +115,6 @@ inoremap Kj <Esc>
 inoremap KJ <Esc>
 nmap gn <Esc>:noh<Esc>
 
-vmap gl :s/\$\\|\\\[\\|\\\]//g<cr>gv<tab>alil<tab>
-vmap gb :s/\$\\|\\\[\\|\\\]//g<cr>gv<tab>\[<tab>
 
 " matching braces
 "inoremap {} {}<left>
@@ -142,12 +127,6 @@ nnoremap <silent> j gj
 :command! W w
 :command! Q q
 
-" Search&replace shortcuts
-nmap <space> <Esc>/
-nmap <c-space> <Esc>?
-imap <c-s> <Esc>:w<cr>
-nmap <c-s> :w<cr><Esc>
-vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 
 "switch @ and ^
 nnoremap @ ^
@@ -169,29 +148,11 @@ augroup qf " remove Quickfix from rotation
     autocmd FileTyPe qf set nobuflisted
 augroup END
 
-" autocorrect typos
-iabbrev teh the
-iabbrev oemga omega
-iabbrev oemga' omega'
-iabbrev dd .. doctest::
-iabbrev brv \begin{revision}
-iabbrev erv \end{revision}
 
-" Edit .vimrc and some other files
-let MYDEFS="~/.cls/mydefs/mydefs.sty"
-let MYBIB=$BIBFILE
 
 " The leader
 let mapleader=";"
 let maplocalleader=";"
-
-nmap <Leader>ev :e ~/.vimrc<CR>
-nmap <Leader>eg :e ~/.gvimrc<CR>
-nmap <Leader>em :e ~/.cls/mydefs/mydefs.sty<CR>
-nmap <Leader>eb :e ~/.bib/mybib.bib<CR>
-nmap <Leader>ep :e ~/.profile<CR>
-nmap <Leader>p <Esc>:w<CR>:!python3 %<CR>
-nmap <Leader>m <Esc>:w<CR>:make <CR><CR>
 
 
 let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
@@ -201,8 +162,4 @@ let g:ultisnips_python_style="google"
  
 autocmd BufWinEnter,Syntax * syn sync minlines=500 maxlines=500
  
-
-" Local settings "
-""""""""""""""""""
-source ~/.vimrc.local
 
