@@ -1,0 +1,39 @@
+if [ $1 == "" ]; then
+  echo "Need an input file."
+  exit 1
+fi
+
+fullfile=$1
+filename=$(basename -- "$fullfile")
+extension="${filename##*.}"
+filename="${filename%.*}"
+
+if [ $extension == "pdf" ]; then
+  echo "Already pdf. No need to convert."
+  break
+else
+  echo "Converting "$fullfile" to "$filename".pdf"
+  convert $fullfile -compress JPEG $filename".pdf"
+fi
+
+echo $filename
+echo $extension
+
+com1="cpdf -add-text \"\n%B-%d-%Y\" \
+     -font-size 200 \
+     -font Helvetica \
+     -color "white" 
+    \"${filename}.pdf\"
+    -o \"${filename}_first.pdf\""
+
+com2="cpdf -add-text \"\n%B-%d-%Y\" \
+     -font-size 200 \
+     -font Helvetica \
+     -color "black" 
+     -outline -linewidth 5 \
+    \"${filename}_first.pdf\"
+    -o \"${filename}_time_stamped.pdf\""
+eval $com1
+eval $com2
+eval "rm ${filename}_first.pdf"
+

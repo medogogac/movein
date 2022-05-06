@@ -1,0 +1,13 @@
+#!/bin/bash
+# updates the bib section of the math website (shell)
+rm -rf published.html
+rm -rf preprints.html
+
+bib2html  $BIBDIR/zitkovic_publications.bib > published.html
+bib2html  $BIBDIR/zitkovic_publications_in_prep.bib > preprints.html
+
+scp published.html $WWWDIR
+scp preprints.html $WWWDIR
+
+rm -rf published.html
+rm -rf preprints.html

@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+# lists utils in the ~/bin dir with descriptions
+import os
+import re
+from termcolor import cprint
+
+bindir = os.environ['BINDIR']
+ignores = [r"\.git.*", r".*README.*"]
+
+
+def islegitimate(string):
+    for ign in ignores:
+        if re.match(ign,string):
+            return(False)
+    return(True)
+
+files = sorted([ f for f in os.listdir(bindir) if islegitimate(f)])
+number = 0;
+ofile=open(bindir+'/README.md','w')
+ofile.write("The Bin Dir\n")
+ofile.write("===========\n\n")
+ofile.write("Various homegrown utilities\n\n")
+for file in files:
+    number += 1
+    fop=open(bindir+'/'+file,'r')
+    lines=fop.readlines();
+    description= lines[1][1:-1];
+    # screen output
+    fnum = f"{number:2d}"+".";
+    fnam = f" `{file}'"
+    print(fnum,end='')
+    cprint(fnam,'yellow', end='')
+    print(description)
+    # file output
+    ofile.write(fnum+fnam+description+"\n")
+ofile.close();
+
+

@@ -1,0 +1,22 @@
+#!/bin/sh
+# appends the SSH key to the remove authorized_keys2 file (shell)
+domain=$1
+if [ "$domain" = "" ]
+then
+  domain="gordanz@math.utexas.edu"
+  echo "Using the default domain $domain"
+fi
+
+if [ -f ~/.ssh/id_rsa.pub ]
+then
+  echo " __ ~/.ssh/id_rsa.pub already exists"
+else
+  echo " __ ~/.ssh/id_ras.put does not exist, need to create it."
+  echo " __ Setting up the SSH private/public key"
+  echo " __ Generating keygen"
+  ssh-keygen -t rsa
+fi
+
+echo " __ Appending ~/.ssh/id_rsa.pub to remote .ssh/authorized_keys2"
+cat ~/.ssh/id_rsa.pub | ssh $domain 'cat >> ~/.ssh/authorized_keys2'
+echo " __ No more passwords for ssh to $1 from now on !"

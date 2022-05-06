@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+# used to produce permuted versions of exams
+"""This script produces several versions of an exam. It permutes the lines
+between the line starting with "% START" and the line starting with "% END".
+and outputs 5 permuted files. It also replaces "theTYPE" anywhere by the type
+(A,B,...)
+"""
+import os
+import sys
+import string
+import re
+import numpy as np
+from termcolor import colored
+import argparse
+
+
+# Hardcoded constants
+########################
+types=['A','B','C','D','E']
+outdir=os.getcwd()+'/'
+
+# Utility functions
+##############################
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+def vprint(name,message = ''):
+    if arg.v:
+        print(colored(name,'green')+message)
+
+def vbanner(name):
+    if arg.v:
+        print("\n"+colored(name + '\n' + '-'*len(name),'white', attrs = ['bold']))
+
+def bprint(name,message=''):
+    print(colored(name,'cyan')+message)
+
+def error(message):
+    eprint(colored("Error: ",'red')+message)
+    sys.exit(1)
+
+def mycommand(com):
+    os.system(com)
+    # print(com)
+
+# Parse arguments
+#############################
+parser = argparse.ArgumentParser(description = __doc__ ) # add the docstring into the -h output
+parser.add_argument("exam" , help = "the name of the exam file")
+parser.add_argument("-v" , action = "store_true", help = "verbose output")
+arg = parser.parse_args()
+
+import os
+name, ext = os.path.splitext(arg.exam)
+if not ext:
+    ext = ".tex"
+infile=name+ext
+
+# invert a permutation
+def invertpermutation(prm):
+    invperm=np.empty(prm.size, dtype=int)
+    for i in np.arange(prm.size):
+        invperm[prm[i]]=i
+    return(invperm)
+
+# this is important - we want the same permutation every time.
+np.random.seed(0);
+vprint("Opening file: ",infile)
+pre=[]; problems=[]; post=[];
+stage=0;
+with open(infile) as f:
+    for line in f:
+        if re.match('% START*',line):
+            stage=1;
+            vprint("Found: ","% START")
+        elif re.match('% END*',line):
+            stage=2;
+            vprint("Found: ","% END")
+        else:
+            if stage==0:
+                if (not line.isspace() and line.lstrip()[0]=="%" and re.search("nosolutions",line)):
+                    error("Looks like you left solutions on.")
+                pre.append(line);
+            elif stage==1:
+                if (not line or line.isspace()):
+                    error("An empty line among problems. Quitting")
+                elif line.lstrip()[0]=="%":
+                    error("A commented line among problems. Quitting.")
+                problems.append(line);
+            else:
+                post.append(line);
+    f.close();
+if stage!=2:
+    error("Something wrong with the input file")
+
+prmfilename=outdir+name+"-prm.txt"
+pfile = open(prmfilename,'w')
+print(prmfilename)
+
+numprobs=len(problems);
+vprint("Success: ",f"split {infile} into 3 parts; {numprobs} problems.")
+for thetype in types:
+    outfile=outdir+name+"-"+thetype+".tex"
+    vprint("Writing to: ",outfile)
+    if thetype!="A":
+        perm=np.random.permutation(numprobs);
+    else:
+        perm = np.arange(numprobs);
+    pfile.write("Type: "+str(thetype)+", perm: "+ str(perm+1)+"\n");
+    prproblems  = [problems[i] for i in perm];
+    with open(outfile,'w') as o:
+        for ll in pre:
+            ll=ll.replace('theTYPE',thetype)
+            o.write(ll)
+        for ll in prproblems:
+            ll=ll.replace('theTYPE',thetype)
+            o.write(ll)
+        for ll in post:
+            ll=ll.replace('theTYPE',thetype)
+            o.write(ll)
+    o.close();
+pfile.close()
+vprint("Done with versions. Starting latexing")
+
+for type in types:
+    mycommand("latexmk -xelatex "+outdir+name+"-"+type+".tex")

@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+# grabs the academic calender from the UT website
+import sys
+from bs4 import BeautifulSoup
+import requests
+
+if len(sys.argv) != 2:
+    print("Usage: " + sys.argv[0] + " year")
+    sys.exit(1)
+
+try:
+    year = int(sys.argv[1])
+except:
+    print("Please enter a valid year number instead of " + sys.argv[1])
+    sys.exit(1)
+
+y = year % 100
+ny = (year + 1) % 100
+ystr = str(y).zfill(2)
+nystr = str(ny).zfill(2)
+ys = ystr + "-" + nystr
+
+
+def dictfromseason(season):
+    tags = season.find_all(['dt', 'dd'])
+    dd = {}
+    for t in tags:
+        if t.name == 'dt':
+            currenttag = t.text
+        else:
+            if currenttag in dd:
+                dd[currenttag].append(t.text)
+            else:
+                dd[currenttag] = [t.text]
+    # some postprocessing
+    for key in dd:
+        dd[key] = ' '.join(dd[key])
+    return(dd)
+
+
+def getcalendars(yearstring):
+    url = 'https://registrar.utexas.edu/calendars/' + yearstring
+    page = requests.get(url)
+    if page.status_code != requests.codes.ok:
+        print("Page error. Code: " + str(page.status_code))
+        sys.exit(1)
+
+    soup = BeautifulSoup(page.text, 'html.parser')
+    x = soup.find_all('dl')  # this will find three tables
+    summer = dictfromseason(x[0])
+    fall = dictfromseason(x[1])
+    spring = dictfromseason(x[2])
+    return(summer, fall, spring)
+
+
+def dates(season):
+    hd = []
+    for date in season:
+        if 'lasses begin' in season[date]:
+            cb = date
+        if 'oliday' in season[date] or 'pring break' in season[date]:
+            hd.append(date)
+        if 'welfth' in season[date]:
+            tw = date
+        if ('ast class day' in season[date]) and ('last class day in the School of Law' not in season[date]):
+            la = date
+    return([cb, hd, tw, la])
+
+
+def output(l):
+    cb, hd, tw, la = l
+    print("Classes begin on\n\t" + str(cb))
+    print("Last class day\n\t" + str(la))
+    print("Twelfth day\n\t" + str(tw))
+    print("Holidays\n \t", end="")
+    print(hd)
+
+
+summer, fall, spring = getcalendars(ys)
+print("Fall semester 20" + ystr)
+print("------------------")
+output(dates(fall))
+
+print()
+print("Spring semester 20" + nystr)
+print("--------------------")
+output(dates(spring))

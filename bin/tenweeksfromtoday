@@ -1,0 +1,22 @@
+#!/usr/bin/python
+# returns the date 10 weeks from today
+import datetime
+import calendar
+
+today = datetime.date.today()
+Weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+tenweeks = datetime.timedelta(days=70)
+day=today+tenweeks
+wday=Weekday[datetime.date.weekday(day)]
+print (wday+","+str(day))
+
+
+
+
+
+
+
+
+
+

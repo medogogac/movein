@@ -1,0 +1,15 @@
+#!/bin/sh
+# opens, closes and lists socks tunnels (shell)
+case $1 in
+    on | open )             echo "Opening a tunnel."
+                            ssh -D 8123 -f -C -q -N gordanz@ssh.ma.utexas.edu
+                                ;;
+    off | close )           echo "Closing all tunnels."
+                            pkill -f "ssh -D"
+                                ;;
+    list | tunnels)         echo "Listing all tunnels:"
+                            ps aux | grep -ie "ssh -D" | awk '{print $2,":",$11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23}' | grep -v "grep"
+                                ;;
+    * )                     echo "usage: socks on|off|list"
+                            return 1
+esac

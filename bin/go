@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+# opens a file using the appropriate application (mostly editor) 
+import os
+import sys
+# import termcolor
+# from termcolor import colored
+import argparse
+from os.path import expanduser, expandvars
+
+####################################################
+# Argument parsing and default values
+####################################################
+MAIN = ".main"
+SOCK = "/tmp/nvimsocket"
+
+def printv(s):
+    if arg.verbose:
+        print(s)
+
+def enq(s):
+    return("\'"+s+"\'")
+
+# argument parsing
+argumentparser = argparse.ArgumentParser(description="open the file using the appropriate app")
+argumentparser.add_argument("-v","--verbose",
+  help="verbose output", action="store_true")
+argumentparser.add_argument("-l","--latex", help="run latexmk", action = "store_true")
+argumentparser.add_argument("names", nargs=argparse.REMAINDER)
+arg=argumentparser.parse_args()
+
+printv("In verbose mode.")
+
+if arg.names:
+    printv("Got file name(s) from the command line.")
+    names = arg.names
+else:
+    printv("No file name(s) given on the command line. Trying "+enq(MAIN))
+    if not  os.path.isfile(MAIN):
+        print("Exiting. No file name(s), no file "+enq(MAIN))
+        sys.exit(1)
+    else:
+        printv("File "+enq(MAIN)+" exists.")
+        with open(MAIN) as f:
+            names = f.read().split()
+        if not names:
+            print("Exiting. No file name(s), .main exists, but is empty.")
+            sys.exit(1)
+        else:
+            printv("Got file name(s) from "+enq(MAIN))
+
+printv("File name(s) = "+str(names))
+first = names[0]
+printv("Using the first file name \'"+first+"\' to determine the app.")
+extension = os.path.splitext(first)[1]
+if not os.path.isfile(first):
+    if extension == "" :
+        printv("Extension is empty. Assuming "+enq(".tex"))
+        extension = ".tex"
+        names[0] = names[0]+".tex"
+    elif extension == ".":
+        printv("Extension is '.'. Assuming "+enq(".tex"))
+        extension = ".tex"
+        names[0] = names[0]+"tex"
+printv("Extension is "+enq(extension))
+
+post = ''
+if extension in ['.tex', '.bib', '.cls', '.sty']:
+    if os.path.isfile(SOCK):
+        os.remove(SOCK)
+        printv("Removing "+enq(SOCK))
+    else:
+        printv("No file "+enq(SOCK)+" to remove")
+    if 'OPENTEX' in os.environ:
+        app = os.environ['OPENTEX']
+    else:
+        app = "open"
+elif extension in ['.pdf']:
+    if 'OPENPDF' in os.environ:
+        app = os.environ['OPENPDF']
+    else:
+        app = "open"
+    post = '&'
+elif extension in ['.ipynb']:
+	app = "jupyter notebook --notebook-dir `pwd` $1 > /tmp/jupyter-log.log 2>&1 &"
+else:
+    app = "open"
+    # if 'EDITORCOMMAND' in os.environ:
+    #     app = os.environ['EDITORCOMMAND']
+    # else:
+    #     app = "open"
+
+printv("Using app " + enq(app) + ", with post "+enq(post))
+command = app + " "+" ".join(names)+' '+post
+printv("Using command : " + command)
+os.system(command)
+if arg.latex:
+    printv("Running latexmk (with preview)")
+    command = "latexmk -pdf -pvc " + names[0]
+    printv("Using command : " + command)
+    os.system(command)
+
