@@ -1,8 +1,0 @@
-#!/bin/sh
-# greps the default bibtex file (shell)
-# uses the env variable $BIBFILE to find the default bibtex
-# file (most likely mybib.bib)
-
-
-awk "BEGIN { RS = \"@\" IGNORECASE = 1} /$1/" "$BIBFILE" exit 1
-

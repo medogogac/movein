@@ -1,4 +1,0 @@
-#!/bin/sh
-# edits the file containing pattern with editor
-command="ag -l \"$1\" | xargs subl"
-eval $command

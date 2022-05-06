@@ -1,7 +1,0 @@
-#!/bin/sh
-# removes all the junk files left after a latex compilation
-exts=".aux .bbl .blg .brf .ego .fls .glo .idx .ilg .ind _latexmk .lof .log .lol .lot .nav .out .snm .toc synctex.gz .tex~ .xdv .bak0"
-
-for ext in $exts; do
-         rm -f *$ext
-done

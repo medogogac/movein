@@ -1,5 +1,0 @@
-#!/bin/bash
-# produces a random label to be used with LaTeX equations (shell)
-y=`printf "%x" $RANDOM`
-echo "$y" | tr '[a-z]' '[A-Z]'
-
